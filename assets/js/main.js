@@ -32,8 +32,6 @@ $(function() {
          let index = $(this).attr("data-time");
          let text = $(".schedule-item").filter("[data-text='" + index + "']").val();
 
-         alert("Textarea value: " + text)
-
          appendToStorage(("data-text-index:" + index),text);
  
         });
@@ -41,22 +39,9 @@ $(function() {
 
         $("body").append(containerDiv);
 
-        // let timeAdd1 = seedTime.add(1,'hours');
-        // console.log("Seed + 1 : " + hoursTmp.format("HH:mm"));
-
-        // if(today.isAfter(seedTime)){
-        //   alert("We are after.")
-        // }
-        // else if(today.isBefore(seedTime)){
-        //   alert("We are before");
-        // }
-        // else{
-        //   alert("We are between")
-        // }
-
         //our seed date today at start of business hours
         let today = moment();
-        let seedTime = moment({ y: today.year(), M: today.month(), d: today.day(), h: 11, m: 0, s: 0, ms: 0}); 
+        let seedTime = moment({ y: today.year(), M: today.month(), d: today.date(), h: 8, m: 0, s: 0, ms: 0}); 
         let tmpTime;
         let oldTime;
 
@@ -68,11 +53,11 @@ $(function() {
             let pTimeEl = $("<p>").attr("id",(i));
 
             if(i===0){
-              tmpTime = seedTime;
-              oldTime = tmpTime;
+              tmpTime = seedTime.clone();
+              oldTime = tmpTime.clone();;
             }            
             else{
-              oldTime = tmpTime;
+              oldTime = tmpTime.clone();
               tmpTime = tmpTime.add(1,'hours');
             }
 
@@ -82,28 +67,25 @@ $(function() {
 
             let msgDiv = $("<div>").addClass("col-9 my-col");
 
-            console.log("Today hours: " + today.format("HH:mm"));
-            console.log("Tmp hours: " + tmpTime.format("HH:mm"));
-            console.log("old hours: " + oldTime.format("HH:mm"));
+            // console.log("Today: " + today.format())
+            // console.log("Seed Time: " + seedTime.format())
+            // console.log("Between: " + today.isBetween(oldTime,tmpTime));
+            // console.log("BEFORE: " + today.isBefore(tmpTime));
+            // console.log("AFTER: " + today.isAfter(tmpTime));
+            // console.log("Tmp hours: " + tmpTime.format());
+            // console.log("old hours: " + oldTime.format());
 
-            if(today.isBetween(oldTime,tmpTime,'hours'))
-            { 
+            if(today.isBetween(oldTime,tmpTime)){ 
               console.log("present");
               msgDiv.addClass("present");
-            }
-
-            if(tmpTime.isBefore(today,'hours'))
-            {
-              console.log("past");
-              msgDiv.addClass("past");
-            }
-
-            if(tmpTime.isAfter(today,'hours')){
+            }else if(today.isBefore(tmpTime)){
               console.log("future");
               msgDiv.addClass("future");
             }
-
-            console.log("Before/After: " + today.isAfter(tmpTime, 'hours')); 
+            else{
+              console.log("past");
+              msgDiv.addClass("past");
+            }
 
             //If local storage exists for this item, also append that text
             let txtAreaEl = $("<textarea>").attr("placeholder","Text Here").attr("data-text",i);
