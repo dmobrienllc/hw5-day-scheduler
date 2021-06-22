@@ -4,8 +4,6 @@ $(function() {
        
         let currText = localStorage.getItem(key);
 
-        //instead of this maybe blow it away and just enter whatever comes
-        //in? 
         if(currText === null) {
           currText = "";
           localStorage.setItem(key,currText);
@@ -19,6 +17,18 @@ $(function() {
           localStorage.setItem(key,data);
         }
       }
+
+    function getRowStylingClass(today,oldTime,tmpTime){
+        let tmp;
+    
+        if(today.isBetween(oldTime,tmpTime)){ 
+          return "present";
+        }else if(today.isBefore(tmpTime)){
+          return "future";
+        }else{
+          return "past";
+        }
+      }
     
     function init(){
       buildScheduler();
@@ -26,14 +36,12 @@ $(function() {
 
     function buildScheduler(){
         let containerDiv = $("<div>").addClass("container my-container");
-        //BEGIN BUILD CALLBACK
         containerDiv.on('click', '.save-button', function (event) {
 
-         let index = $(this).attr("data-time");
-         let text = $(".schedule-item").filter("[data-text='" + index + "']").val();
+          let index = $(this).attr("data-time");
+          let text = $(".schedule-item").filter("[data-text='" + index + "']").val();
 
-         appendToStorage(("data-text-index:" + index),text);
- 
+          appendToStorage(("data-text-index:" + index),text);
         });
         //END BUILD CALLBACK
 
@@ -45,9 +53,11 @@ $(function() {
         let tmpTime;
         let oldTime;
 
+        //this would be more elegant as a .json.each(function)
         for (var i = 0; i < 10; i++) {
 
             let rowDiv = $("<div>").addClass("row my-row pl-0");
+            containerDiv.append(rowDiv);
 
             let timeDiv = $("<div>").addClass("col-1 my-col my-col-left time-block");
             let pTimeEl = $("<p>").attr("id",(i));
@@ -65,33 +75,13 @@ $(function() {
             timeDiv.append(pTimeEl);
             rowDiv.append(timeDiv);
 
+            //BUILD MESSAGE DIV
             let msgDiv = $("<div>").addClass("col-9 my-col");
+            msgDiv.addClass(getRowStylingClass(today,oldTime,tmpTime));
 
-            // console.log("Today: " + today.format())
-            // console.log("Seed Time: " + seedTime.format())
-            // console.log("Between: " + today.isBetween(oldTime,tmpTime));
-            // console.log("BEFORE: " + today.isBefore(tmpTime));
-            // console.log("AFTER: " + today.isAfter(tmpTime));
-            // console.log("Tmp hours: " + tmpTime.format());
-            // console.log("old hours: " + oldTime.format());
-
-            if(today.isBetween(oldTime,tmpTime)){ 
-              console.log("present");
-              msgDiv.addClass("present");
-            }else if(today.isBefore(tmpTime)){
-              console.log("future");
-              msgDiv.addClass("future");
-            }
-            else{
-              console.log("past");
-              msgDiv.addClass("past");
-            }
-
-            //If local storage exists for this item, also append that text
             let txtAreaEl = $("<textarea>").attr("placeholder","Text Here").attr("data-text",i);
             txtAreaEl.addClass("schedule-item");
             
-            //TODO: Make sure these aren't duplicated
             let storageKey = "data-text-index:" + i;
             if(localStorage.getItem(storageKey)===null){
               localStorage.setItem(storageKey,"");
@@ -104,20 +94,28 @@ $(function() {
             msgDiv.append(txtAreaEl);
             rowDiv.append(msgDiv);
 
+            //BUTTON DIV
             let buttonDiv = $("<div>").addClass("col-2 my-col");
             let saveBtnEl = $("<button>").attr("type","button").attr("class","save-button");
             saveBtnEl.attr("data-time", i);
             saveBtnEl.text("Save");
             buttonDiv.append(saveBtnEl);
             rowDiv.append(buttonDiv);
-
-            containerDiv.append(rowDiv);
-
-      }//for loop
+      }
     }
 
     init();
   });
+
+
+  //debugging
+  // console.log("Today: " + today.format())
+  // console.log("Seed Time: " + seedTime.format())
+  // console.log("Between: " + today.isBetween(oldTime,tmpTime));
+  // console.log("BEFORE: " + today.isBefore(tmpTime));
+  // console.log("AFTER: " + today.isAfter(tmpTime));
+  // console.log("Tmp hours: " + tmpTime.format());
+  // console.log("old hours: " + oldTime.format());
 
 
 
